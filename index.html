@@ -138,4 +138,153 @@
         <div class="day-box" data-value="Sunday"><span class="day-letter">S</span><span class="day-short">SUN</span></div>
       </div>
     </div>
-    <hr class="d
+    <hr class="divider">
+    <div class="form-section">
+      <label class="form-label"><span class="step">04</span>Biggest Weakness</label>
+      <div class="pill-group" id="weakness-group">
+        <div class="pill" data-value="Stamina">Stamina</div>
+        <div class="pill" data-value="Speed">Speed</div>
+        <div class="pill" data-value="Technique">Technique</div>
+        <div class="pill" data-value="Strength">Strength</div>
+        <div class="pill" data-value="Decision Making">Decision Making</div>
+        <div class="pill" data-value="Positioning">Positioning</div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="form-section">
+      <label class="form-label"><span class="step">05</span>Main Goal</label>
+      <div class="pill-group" id="goal-group">
+        <div class="pill" data-value="Play at a higher level">Play Higher Level</div>
+        <div class="pill" data-value="Get fitter and stronger">Get Fitter</div>
+        <div class="pill" data-value="Improve technically">Improve Technically</div>
+        <div class="pill" data-value="Return from injury">Return from Injury</div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="form-section">
+      <label class="form-label"><span class="step">06</span>A Bit More About You</label>
+      <div class="input-row">
+        <div class="input-wrap">
+          <label>Age</label>
+          <input type="number" id="age-input" placeholder="e.g. 22" min="10" max="60">
+        </div>
+        <div class="input-wrap">
+          <label>Training Environment</label>
+          <select id="env-input">
+            <option value="Full pitch access">Full Pitch</option>
+            <option value="Small space only">Small Space</option>
+            <option value="Gym only">Gym Only</option>
+            <option value="Mixed (pitch + gym)">Mixed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="error-msg" id="error-msg">⚠️ Please fill in all fields before generating your plan.</div>
+    <button class="btn-generate" id="generate-btn" onclick="generatePlan()">⚡ GENERATE MY PLAN</button>
+  </div>
+
+  <div class="loading-overlay" id="loading-section">
+    <div class="pitch-loader"><div class="loader-ball"></div></div>
+    <div class="loading-text">BUILDING YOUR PLAN</div>
+    <p class="loading-sub">Analysing your profile and crafting your personalised sessions...</p>
+  </div>
+
+  <div id="output-section">
+    <div class="output-header">
+      <div class="output-title">⚽ YOUR WEEKLY PLAN</div>
+      <button class="btn-restart" onclick="restart()">← New Plan</button>
+    </div>
+    <div class="output-card">
+      <div id="plan-output"></div>
+      <div class="skool-banner">
+        <p><strong>Want weekly updated plans + coaching videos?</strong><br>Join the community for full access.</p>
+        <button class="btn-skool" onclick="window.open('https://skool.com','_blank')">Join Community →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<footer><p>Powered by AI · Your data is never stored · © 2026</p></footer>
+<script>
+  const selections = { position: null, fitness: null, days: [], weakness: null, goal: null };
+  ['position','fitness','weakness','goal'].forEach(group => {
+    document.querySelectorAll(`#${group}-group .pill`).forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll(`#${group}-group .pill`).forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        selections[group] = pill.dataset.value;
+      });
+    });
+  });
+  document.querySelectorAll('#days-group .day-box').forEach(box => {
+    box.addEventListener('click', () => {
+      box.classList.toggle('active');
+      const day = box.dataset.value;
+      if (box.classList.contains('active')) { selections.days.push(day); }
+      else { selections.days = selections.days.filter(d => d !== day); }
+    });
+  });
+  function validate() {
+    return selections.position && selections.fitness && selections.days.length > 0 &&
+           selections.weakness && selections.goal && document.getElementById('age-input').value;
+  }
+  async function generatePlan() {
+    if (!validate()) { document.getElementById('error-msg').classList.add('active'); return; }
+    document.getElementById('error-msg').classList.remove('active');
+    const age = document.getElementById('age-input').value;
+    const env = document.getElementById('env-input').value;
+    const daysStr = selections.days.join(', ');
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('loading-section').classList.add('active');
+    const prompt = `You are an elite football development coach with 20 years experience. Create a training plan so personalised the player feels you've watched them play.
+Follow these rules strictly:
+1. SPECIFICITY: Every drill needs exact distances, duration, sets/reps, rest periods, and 2 coaching cues
+2. POSITION LOGIC: Every session reflects the specific demands of their position
+3. WEAKNESS FIRST: Their weakness threads through every session
+4. SCHEDULE FIT: Use ONLY these days: ${daysStr}. All others are rest days.
+5. SOLO-FIRST: Every drill works alone. Add Partner Version where relevant.
+6. PROGRESSION HOOK: End with "Week 2 Preview" with 3 specific progressions referencing exact numbers from Week 1.
+7. PERSONAL TONE: Open with a personal 2-3 sentence note. Sign off as "— Your AI Coach"
+Player: ${selections.position}, Age ${age}, ${selections.fitness}, Weakness: ${selections.weakness}, Goal: ${selections.goal}, Environment: ${env}
+Use markdown formatting. Put 🧠 before every coaching cue.`;
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content[0].text;
+      document.getElementById('loading-section').classList.remove('active');
+      document.getElementById('output-section').classList.add('active');
+      document.getElementById('plan-output').innerHTML = renderMarkdown(text);
+    } catch(err) {
+      document.getElementById('loading-section').classList.remove('active');
+      document.getElementById('form-section').style.display = 'block';
+      document.getElementById('error-msg').textContent = '⚠️ Something went wrong. Please try again.';
+      document.getElementById('error-msg').classList.add('active');
+    }
+  }
+  function renderMarkdown(text) {
+    return text.split('\n').map(line => {
+      if (line.startsWith('# ')) return `<h1>${line.slice(2)}</h1>`;
+      if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+      if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
+      if (line.includes('🧠')) return `<div class="cue-block">${line}</div>`;
+      if (line.startsWith('- ')) return `<p>• ${line.slice(2)}</p>`;
+      if (line.startsWith('---')) return `<hr>`;
+      if (!line.trim()) return `<br>`;
+      return `<p>${line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}</p>`;
+    }).join('');
+  }
+  function restart() {
+    document.getElementById('output-section').classList.remove('active');
+    document.getElementById('form-section').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
