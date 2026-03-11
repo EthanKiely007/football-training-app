@@ -168,9 +168,48 @@
 
   .loading-overlay { display: none; text-align: center; padding: 60px 0; }
   .loading-overlay.active { display: block; }
-  .pitch-loader { width: 80px; height: 56px; border: 2px solid var(--border); border-radius: 8px; margin: 0 auto 24px; position: relative; overflow: hidden; }
-  .loader-ball { width: 10px; height: 10px; background: var(--pitch); border-radius: 50%; position: absolute; top: 50%; left: 20%; transform: translateY(-50%); animation: ballMove 1.4s ease-in-out infinite; box-shadow: 0 0 12px var(--pitch); }
-  @keyframes ballMove { 0%, 100% { left: 20%; } 50% { left: 72%; } }
+
+  .pass-scene {
+    width: 260px; height: 100px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .player {
+    position: absolute; bottom: 0; width: 28px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .player-head { width: 14px; height: 14px; background: var(--pitch); border-radius: 50%; margin-bottom: 2px; }
+  .player-body { width: 18px; height: 22px; background: var(--pitch); border-radius: 4px 4px 0 0; opacity: 0.85; }
+  .player-legs { width: 18px; height: 12px; display: flex; gap: 4px; }
+  .player-leg { width: 7px; height: 12px; background: var(--pitch); border-radius: 0 0 3px 3px; opacity: 0.7; }
+  .player-left { left: 0; animation: kickLeft 1.8s ease-in-out infinite; }
+  .player-right { right: 0; transform: scaleX(-1); animation: kickRight 1.8s ease-in-out infinite; }
+  @keyframes kickLeft {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(8deg); }
+    20% { transform: rotate(0deg); }
+  }
+  @keyframes kickRight {
+    0%, 100% { transform: scaleX(-1) rotate(0deg); }
+    55% { transform: scaleX(-1) rotate(8deg); }
+    65% { transform: scaleX(-1) rotate(0deg); }
+  }
+  .pass-scene::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 2px; background: linear-gradient(90deg, transparent, rgba(0,255,135,0.3), transparent);
+  }
+  .pass-ball {
+    position: absolute; font-size: 22px; bottom: 12px;
+    animation: passBall 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px rgba(0,255,135,0.5));
+  }
+  @keyframes passBall {
+    0%   { left: 22px;  bottom: 12px; transform: rotate(0deg); }
+    45%  { left: 50%;   bottom: 52px; transform: rotate(180deg) translateX(50%); }
+    50%  { left: calc(100% - 44px); bottom: 12px; transform: rotate(360deg); }
+    95%  { left: 50%;   bottom: 52px; transform: rotate(540deg) translateX(50%); }
+    100% { left: 22px;  bottom: 12px; transform: rotate(720deg); }
+  }
   .loading-text { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--pitch); letter-spacing: 0.1em; margin-bottom: 8px; }
   .loading-sub { color: var(--muted); font-size: 13px; }
 
@@ -347,7 +386,25 @@
   </div>
 
   <div class="loading-overlay" id="loading-section">
-    <div class="pitch-loader"><div class="loader-ball"></div></div>
+    <div class="pass-scene">
+      <div class="player player-left">
+        <div class="player-head"></div>
+        <div class="player-body"></div>
+        <div class="player-legs">
+          <div class="player-leg"></div>
+          <div class="player-leg"></div>
+        </div>
+      </div>
+      <div class="pass-ball">⚽</div>
+      <div class="player player-right">
+        <div class="player-head"></div>
+        <div class="player-body"></div>
+        <div class="player-legs">
+          <div class="player-leg"></div>
+          <div class="player-leg"></div>
+        </div>
+      </div>
+    </div>
     <div class="loading-text">BUILDING YOUR PLAN</div>
     <p class="loading-sub">Analysing your profile and crafting your personalised sessions...</p>
   </div>
