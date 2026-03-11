@@ -169,47 +169,51 @@
   .loading-overlay { display: none; text-align: center; padding: 60px 0; }
   .loading-overlay.active { display: block; }
 
-  .pass-scene {
-    width: 260px; height: 100px;
+  .orbit-scene {
+    width: 120px;
+    height: 120px;
     margin: 0 auto 28px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .player {
-    position: absolute; bottom: 0; width: 28px;
-    display: flex; flex-direction: column; align-items: center;
+
+  .earth {
+    font-size: 52px;
+    animation: earthSpin 8s linear infinite;
+    display: block;
+    line-height: 1;
   }
-  .player-head { width: 14px; height: 14px; background: var(--pitch); border-radius: 50%; margin-bottom: 2px; }
-  .player-body { width: 18px; height: 22px; background: var(--pitch); border-radius: 4px 4px 0 0; opacity: 0.85; }
-  .player-legs { width: 18px; height: 12px; display: flex; gap: 4px; }
-  .player-leg { width: 7px; height: 12px; background: var(--pitch); border-radius: 0 0 3px 3px; opacity: 0.7; }
-  .player-left { left: 0; animation: kickLeft 1.8s ease-in-out infinite; }
-  .player-right { right: 0; transform: scaleX(-1); animation: kickRight 1.8s ease-in-out infinite; }
-  @keyframes kickLeft {
-    0%, 100% { transform: rotate(0deg); }
-    10% { transform: rotate(8deg); }
-    20% { transform: rotate(0deg); }
+
+  @keyframes earthSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
-  @keyframes kickRight {
-    0%, 100% { transform: scaleX(-1) rotate(0deg); }
-    55% { transform: scaleX(-1) rotate(8deg); }
-    65% { transform: scaleX(-1) rotate(0deg); }
+
+  .orbit-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px dashed rgba(0,255,135,0.25);
+    animation: none;
   }
-  .pass-scene::after {
-    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
-    height: 2px; background: linear-gradient(90deg, transparent, rgba(0,255,135,0.3), transparent);
+
+  .orbit-ball {
+    position: absolute;
+    font-size: 20px;
+    top: 50%;
+    left: 50%;
+    transform-origin: 0 0;
+    animation: orbit 2s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(0,255,135,0.6));
   }
-  .pass-ball {
-    position: absolute; font-size: 22px; bottom: 12px;
-    animation: passBall 1.8s ease-in-out infinite;
-    filter: drop-shadow(0 0 6px rgba(0,255,135,0.5));
+
+  @keyframes orbit {
+    from { transform: rotate(0deg) translateX(58px) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(58px) rotate(-360deg); }
   }
-  @keyframes passBall {
-    0%   { left: 22px;  bottom: 12px; transform: rotate(0deg); }
-    45%  { left: 50%;   bottom: 52px; transform: rotate(180deg) translateX(50%); }
-    50%  { left: calc(100% - 44px); bottom: 12px; transform: rotate(360deg); }
-    95%  { left: 50%;   bottom: 52px; transform: rotate(540deg) translateX(50%); }
-    100% { left: 22px;  bottom: 12px; transform: rotate(720deg); }
-  }
+
   .loading-text { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--pitch); letter-spacing: 0.1em; margin-bottom: 8px; }
   .loading-sub { color: var(--muted); font-size: 13px; }
 
@@ -386,24 +390,10 @@
   </div>
 
   <div class="loading-overlay" id="loading-section">
-    <div class="pass-scene">
-      <div class="player player-left">
-        <div class="player-head"></div>
-        <div class="player-body"></div>
-        <div class="player-legs">
-          <div class="player-leg"></div>
-          <div class="player-leg"></div>
-        </div>
-      </div>
-      <div class="pass-ball">⚽</div>
-      <div class="player player-right">
-        <div class="player-head"></div>
-        <div class="player-body"></div>
-        <div class="player-legs">
-          <div class="player-leg"></div>
-          <div class="player-leg"></div>
-        </div>
-      </div>
+    <div class="orbit-scene">
+      <div class="orbit-ring"></div>
+      <div class="earth">🌍</div>
+      <div class="orbit-ball">⚽</div>
     </div>
     <div class="loading-text">BUILDING YOUR PLAN</div>
     <p class="loading-sub">Analysing your profile and crafting your personalised sessions...</p>
@@ -432,6 +422,122 @@
 <script>
   const selections = { position: null, fitness: null, days: [], weakness: null, goal: null };
   let currentPlanText = '';
+
+  const MOCK_PLAN = `# 7-DAY ELITE DEVELOPMENT PLAN
+
+*Central Midfielder • Age 22 • Intermediate*
+
+---
+
+A note for you: As a CM targeting higher level football, your stamina deficit is the root cause of your decision-making struggles in the final 30 minutes. When your engine fades, your brain slows — and that's the cycle we're breaking this week.
+
+## DAY 1 — MONDAY
+### Aerobic Engine + Ball Mastery
+
+**Drill 1 | Long Aerobic Dribbling Circuit**
+- Distance: Full pitch length (100m) x 6 runs
+- Duration: 20-24 minutes total
+- Sets/Reps: 6 reps, alternating sides
+- Rest: 60 seconds between reps
+
+🧠 Keep your head up every 3-4 touches — scan as if defenders are approaching
+🧠 Breathe rhythmically: inhale for 3 touches, exhale for 3
+
+**Drill 2 | Rondo 5v2 — Sustained Pressure**
+- Grid: 12m x 12m
+- Duration: 8 rounds x 3 minutes
+- Rest: 45 seconds between rounds
+
+🧠 In rounds 5-8, call your intended pass BEFORE you receive — trains decision speed under fatigue
+🧠 Open your hips to see BOTH defenders before receiving
+
+---
+
+## DAY 2 — TUESDAY
+### Position-Specific Conditioning
+
+**Drill 1 | Yo-Yo Modified**
+- Distance: 20m shuttles
+- Duration: 20 minutes continuous
+- Rest: 5 seconds between shuttles
+
+🧠 When you want to stop — that's when the adaptation happens. Hold 2 more reps minimum
+🧠 Stay light on your toes at each turnaround
+
+**Drill 2 | Box-to-Box Decision Runs**
+- Distance: Full pitch (100m)
+- Sets: 10 reps, 45 seconds rest
+- Duration: 25 minutes
+
+🧠 Decide your pass target at 10m out — not when you arrive
+🧠 The right decision made fast beats the perfect decision made slow
+
+---
+
+## DAY 3 — WEDNESDAY
+### Rest Day
+
+Active recovery: 20-30 minute walk. Watch 15 minutes of CM footage — Rodri, Bellingham, or Pedri. Write down 3 observations about how they position themselves under pressure.
+
+---
+
+## DAY 4 — THURSDAY
+### High Intensity Intervals + Pressing
+
+**Drill 1 | Pitch Sprint Intervals**
+- Distance: Full pitch 100m x 8 reps
+- Sets: 2 sets of 4, 90 seconds rest between reps, 3 minutes between sets
+- Effort: 90% — not flat out, maintain form
+
+🧠 Arms drive your legs — if your arms drop, your speed drops
+🧠 Count your strides on rep 1 — match or beat it on reps 7 and 8
+
+**Drill 2 | Press Stamina Circuit**
+- Grid: Full pitch middle third
+- Sets: 3 x 4 minutes, 60 seconds rest
+- Method: Sprint to press cone (30m), backpedal 10m, shuffle 5m, press again
+
+🧠 Approach the cone on a curved run — never straight — to cut off the pass angle
+🧠 Use the backpedal to control your breathing — 3 steps, deep breath
+
+---
+
+## DAY 5 — FRIDAY
+### Rest Day
+
+Full rest. Protein-rich meals, hydrate well, sleep 7-9 hours.
+
+---
+
+## DAY 6 — SATURDAY
+### Game Intelligence Under Fatigue
+
+**Drill 1 | Fatigue-First Decision Circuit**
+- Distance: Full pitch
+- Sets: 5 rounds x 5 minutes, 60 seconds rest
+- Method: Sprint 100m, receive and complete 3-cone passing sequence, sprint back
+
+🧠 After each sprint, give yourself 2 scanning seconds before receiving
+🧠 In rounds 4 and 5, choose the progressive forward pass — not the easy one
+
+---
+
+## DAY 7 — SUNDAY
+### Rest and Review
+
+Full rest. Review your week mentally — where did your decision-making feel sharpest? Where did it slip? That gap tells you exactly where Week 2 doubles down.
+
+---
+
+## WEEK 2 PREVIEW
+
+**1. Sprint volumes increase 25%** — 10 x 100m with 75 second rest (down from 90 seconds)
+
+**2. Decision-making cognitive load increases** — verbal instructions called mid-sprint, forcing your brain to process information while running
+
+**3. Small-sided positional games introduced** — 3v3 and 4v4 with CM-specific rules: complete a forward pass within 4 seconds of receiving
+
+— Your AI Coach`;
 
   ['position','fitness','weakness','goal'].forEach(group => {
     document.querySelectorAll(`#${group}-group .pill`).forEach(pill => {
@@ -479,6 +585,15 @@ Player: ${selections.position}, Age ${age}, ${selections.fitness}, Weakness: ${s
 Use markdown formatting. Put 🧠 before every coaching cue.`;
 
     try {
+      // MOCK MODE — comment this block out and uncomment the fetch below when ready to go live
+      await new Promise(r => setTimeout(r, 2000)); // fake loading delay
+      currentPlanText = MOCK_PLAN;
+      document.getElementById('loading-section').classList.remove('active');
+      document.getElementById('output-section').classList.add('active');
+      document.getElementById('plan-output').innerHTML = renderMarkdown(currentPlanText);
+
+      // LIVE MODE — uncomment this when ready to use real API
+      /*
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -493,6 +608,7 @@ Use markdown formatting. Put 🧠 before every coaching cue.`;
       document.getElementById('loading-section').classList.remove('active');
       document.getElementById('output-section').classList.add('active');
       document.getElementById('plan-output').innerHTML = renderMarkdown(currentPlanText);
+      */
     } catch(err) {
       document.getElementById('loading-section').classList.remove('active');
       document.getElementById('form-section').style.display = 'block';
